@@ -14,15 +14,30 @@ import AuthenticationServices
 
 
 class ViewController: UIViewController {
-
+    
+    private let appleSigninProvider: AppleSignInProvider
+    
+    init(appleSigninProvider: AppleSignInProvider) {
+        self.appleSigninProvider = appleSigninProvider
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        view.backgroundColor = .white
         
         setupAppleButton()
     }
     
     func setupAppleButton() {
-        let appleButton = ASAuthorizationAppleIDButton()
+        let appleButton = appleSigninProvider.appleButton()
+
         appleButton.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(appleButton)
 
@@ -32,53 +47,12 @@ class ViewController: UIViewController {
             appleButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -70.0),
             appleButton.heightAnchor.constraint(equalToConstant: 50.0)
         ])
-
-        appleButton.addTarget(self, action: #selector(appleSignInTapped), for: .touchUpInside)
-    }
-
-    @objc func appleSignInTapped() {
-        let provider = ASAuthorizationAppleIDProvider()
-        let request = provider.createRequest()
-        request.requestedScopes = [.fullName, .email]
         
-        let authController = ASAuthorizationController(authorizationRequests: [request])
-        authController.presentationContextProvider = self
-        authController.delegate = self
-        
-        authController.performRequests()
-    }
-}
-
-extension ViewController : ASAuthorizationControllerPresentationContextProviding {
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return self.view.window!
-    }
-}
-
-extension ViewController : ASAuthorizationControllerDelegate {
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        guard let error = error as? ASAuthorizationError else {
-            print("non ASAuthorizationError")
-            return
+        appleSigninProvider.onSignIn = { [weak self] _ in
+            DispatchQueue.main.async {
+                let controller = UIHostingController(rootView: ResultUIView())
+                self?.navigationController?.setViewControllers([controller], animated: false)
+            }
         }
-
-        switch error.code {
-        case .canceled:
-            print("ASAuthorizationError - Canceled")
-        case .unknown:
-            print("ASAuthorizationError - Unknown")
-        case .invalidResponse:
-            print("ASAuthorizationError - Invalid Respone")
-        case .notHandled:
-            print("ASAuthorizationError - Not handled")
-        case .failed:
-            print("ASAuthorizationError - Failed")
-        @unknown default:
-            print("ASAuthorizationError - Default")
-        }
-    }
-    
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        AppleSignInProvider.didAuthorize(authorization)
     }
 }

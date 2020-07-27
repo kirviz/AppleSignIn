@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -18,6 +19,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
+        
+        let navigationController = (self.window?.rootViewController as? UINavigationController)
+        let appleSigninProvider = AppleSignInProvider(window: self.window!)
+        
+        AppleSignInProvider.checkAuthorisationState(signedIn: {
+            DispatchQueue.main.async {
+                let controller = UIHostingController(rootView: ResultUIView())
+                navigationController?.setViewControllers([controller], animated: false)
+            }
+        }, notSignedIn: {
+            DispatchQueue.main.async {
+                let controller = ViewController(appleSigninProvider: appleSigninProvider)
+                navigationController?.setViewControllers([controller], animated: false)
+            }
+        })
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

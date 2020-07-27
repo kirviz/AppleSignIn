@@ -10,7 +10,23 @@ import SwiftUI
 
 struct ResultUIView: View {
     var body: some View {
-        Text("email: \(UserDefaults.standard.string(forKey: "email") ?? "-")")
+        Form {
+            HStack {
+                Text("UserID:")
+                Spacer()
+                Text("\(UserDefaults.standard.string(forKey: "userID") ?? "-")")
+            }
+            HStack {
+                Text("Email:")
+                Spacer()
+                Text("\(UserDefaults.standard.string(forKey: "email") ?? "-")")
+            }
+            HStack {
+                Text("Name:")
+                Spacer()
+                Text("\(UserDefaults.standard.string(forKey: "givenName") ?? "-") \(UserDefaults.standard.string(forKey: "familyName") ?? "-")")
+            }
+        }.navigationBarTitle("Signed in!")
     }
 }
 

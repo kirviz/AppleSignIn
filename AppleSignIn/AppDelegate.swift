@@ -7,32 +7,11 @@
 //
 
 import UIKit
-import SwiftUI
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    static var shared: AppDelegate = {
-        return (UIApplication.shared.delegate as! AppDelegate)
-    }()
     
-    var appleSignInProvider: AppleSignInProvider!
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        let window = application.windows.first!
-        
-        appleSignInProvider = AppleSignInProvider(window: window)
-        
-        AppleSignInProvider.checkState(signedIn: {
-            DispatchQueue.main.async {
-                let swiftUIView = ResultUIView() // swiftUIView is View
-                let controller = UIHostingController(rootView: swiftUIView)
-                (window.rootViewController as? UINavigationController)?.setViewControllers([controller], animated: false)
-            }
-        }, notSignedIn: {
-            
-        })
         
         return true
     }
